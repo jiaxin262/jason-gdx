@@ -69,6 +69,21 @@ public class IndexScreen implements Screen {
         table.row();
         table.add(rubeButton).padTop(50);
 
+        TextButton truckButton = new TextButton("truck", MyGdxGame.skin);
+        truckButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                game.setScreen(new TruckScreen(game));
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        table.row();
+        table.add(truckButton).padTop(50);
+
     }
 
     @Override
