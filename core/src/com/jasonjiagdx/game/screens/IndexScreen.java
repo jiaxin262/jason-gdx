@@ -39,8 +39,8 @@ public class IndexScreen implements Screen {
         //stage.addActor(label);
 
 
-        TextButton textButton6 = new TextButton("fruits", MyGdxGame.skin);
-        textButton6.addListener(new InputListener() {
+        TextButton fruitsButton = new TextButton("fruits", MyGdxGame.skin);
+        fruitsButton.addListener(new InputListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 game.setScreen(new FruitGameScreen(game));
@@ -52,7 +52,22 @@ public class IndexScreen implements Screen {
             }
         });
         table.row();
-        table.add(textButton6).padTop(10);
+        table.add(fruitsButton).padTop(50);
+
+        TextButton rubeButton = new TextButton("rube", MyGdxGame.skin);
+        rubeButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                game.setScreen(new RubeTestScreen(game));
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        table.row();
+        table.add(rubeButton).padTop(50);
 
     }
 
