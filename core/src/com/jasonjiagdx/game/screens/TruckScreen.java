@@ -3,10 +3,12 @@ package com.jasonjiagdx.game.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -14,12 +16,20 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.physics.box2d.joints.WheelJoint;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.jasonjiagdx.game.MyGdxGame;
 import com.jasonjiagdx.game.b2dJson.Jb2dJson;
 
@@ -29,12 +39,15 @@ public class TruckScreen implements Screen, InputProcessor {
 
     public Game mGame;
     private Stage stage;
+    private Stage uiStage;
     private OrthographicCamera mCamera;
     private ExtendViewport mViewport;
+    private InputMultiplexer multiplexer;
 
     private World mWord;
     private Body mGround;
     private Body mTruck;
+    private RevoluteJoint frontWheelJoint, rearWheelJoint;
     /**
      * our mouse joint
      **/
@@ -61,16 +74,72 @@ public class TruckScreen implements Screen, InputProcessor {
 //        mWord = new World(new Vector2(0, -10), true);
         mGround = jb2dJson.getBodyByName("ground");
         mTruck = jb2dJson.getBodyByName("truckBody");
+        frontWheelJoint = (RevoluteJoint) jb2dJson.getJointByName("frontWheelJoint");
+        rearWheelJoint = (RevoluteJoint) jb2dJson.getJointByName("rearWheelJoint");
+
         mDebugRender = new Box2DDebugRenderer();
 
         mViewport = new ExtendViewport(33, 20);
         stage = new Stage(mViewport);
+        uiStage = new Stage(new ScreenViewport());
+        // add 加速、减速按钮
+        Skin skin = new Skin();
+        skin.add("accBtnUp", new Texture("balloon/3.png"));
+        skin.add("accBtnDown", new Texture("balloon/4.png"));
+        skin.add("decBtnUp", new Texture("balloon/1.png"));
+        skin.add("decBtnDown", new Texture("balloon/7.png"));
+
+        ImageButton decelerateBtn = new ImageButton(skin.getDrawable("decBtnUp"), skin.getDrawable("decBtnDown"));
+        decelerateBtn.setSize(500, 500);
+        decelerateBtn.setPosition(0, 0);
+        decelerateBtn.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                frontWheelJoint.setMotorSpeed(0);
+                rearWheelJoint.setMotorSpeed(0);
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                frontWheelJoint.setMotorSpeed(1000);
+                rearWheelJoint.setMotorSpeed(1000);
+                return true;
+            }
+        });
+
+        ImageButton accelerateBtn = new ImageButton(skin.getDrawable("accBtnUp"), skin.getDrawable("accBtnDown"));
+        accelerateBtn.setSize(500, 500);
+        accelerateBtn.setPosition(300, 0);
+        accelerateBtn.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                frontWheelJoint.setMotorSpeed(0);
+                rearWheelJoint.setMotorSpeed(0);
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                frontWheelJoint.setMotorSpeed(-1000);
+                rearWheelJoint.setMotorSpeed(-1000);
+                return true;
+            }
+        });
+
+        uiStage.addActor(accelerateBtn);
+        uiStage.addActor(decelerateBtn);
+//        Label distanceTextLabel = new Label("distance:0", MyGdxGame.skin, "big");
+//        uiStage.addActor(distanceTextLabel);
+
         mCamera = (OrthographicCamera) stage.getCamera();
+
+        multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(this);
+        multiplexer.addProcessor(uiStage);
     }
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(this);
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     @Override
@@ -83,13 +152,15 @@ public class TruckScreen implements Screen, InputProcessor {
         MyGdxGame.batch.setProjectionMatrix(mCamera.combined);
         stage.act();
         stage.draw();
+        uiStage.act();
+        uiStage.draw();
         MyGdxGame.batch.begin();
         MyGdxGame.batch.end();
 
         float truckPositionX = mTruck.getPosition().x;
         float cameraPositionX = mCamera.position.x;
-        Gdx.app.log(TAG, "truckPositionX:" + truckPositionX + ", cameraPositionX:" + cameraPositionX);
-        if (truckPositionX < 355) {
+        if (Math.abs(truckPositionX - cameraPositionX) > 0.05 && truckPositionX < 355) {
+            Gdx.app.log(TAG, "update camera pos, truckPositionX:" + truckPositionX + ", cameraPositionX:" + cameraPositionX);
             mCamera.position.x = truckPositionX;
             mCamera.update();
         }
@@ -196,7 +267,7 @@ public class TruckScreen implements Screen, InputProcessor {
             def.bodyB = hitBody;
             def.collideConnected = true;
             def.target.set(testPoint.x, testPoint.y);
-            def.maxForce = 1000.0f * hitBody.getMass();
+            def.maxForce = 50.0f * hitBody.getMass();
 
             mouseJoint = (MouseJoint) mWord.createJoint(def);
             hitBody.setAwake(true);
@@ -216,7 +287,9 @@ public class TruckScreen implements Screen, InputProcessor {
         return false;
     }
 
-    /** another temporary vector **/
+    /**
+     * another temporary vector
+     **/
     Vector2 target = new Vector2();
 
     @Override
