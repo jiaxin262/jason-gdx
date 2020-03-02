@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -26,6 +27,7 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -45,6 +47,7 @@ public class TruckScreen implements Screen, InputProcessor {
     private InputMultiplexer multiplexer;
     private TextureAtlas mTextureAtlas;
     private Sprite carBodySprite, frontWheelSprite, rearWheelSprite;
+    private Image groudImage;
 
     private World mWord;
     private Body mGround;
@@ -74,18 +77,17 @@ public class TruckScreen implements Screen, InputProcessor {
         this.mGame = game;
         Gdx.input.setCatchKey(Input.Keys.BACK, true);
         Box2D.init();
-
+        // load rube word
         jb2dJson = new Jb2dJson();
         StringBuilder errMsg = new StringBuilder();
-        mWord = jb2dJson.readFromFile(Gdx.files.internal("rube/truck.json"), errMsg, null);
-//        mWord = new World(new Vector2(0, -10), true);
+        mWord = jb2dJson.readFromFile(Gdx.files.internal("rube/car.json"), errMsg, null);
         mGround = jb2dJson.getBodyByName("ground");
         mTruck = jb2dJson.getBodyByName("truckBody");
         mFrontWheel = jb2dJson.getBodyByName("frontwheel");
         mRearWheel = jb2dJson.getBodyByName("rearwheel");
         frontWheelJoint = (RevoluteJoint) jb2dJson.getJointByName("frontWheelJoint");
         rearWheelJoint = (RevoluteJoint) jb2dJson.getJointByName("rearWheelJoint");
-
+        // 汽车UI
         mTextureAtlas = new TextureAtlas("car/car.txt");
         carBodySprite = mTextureAtlas.createSprite("carBody");
         carBodySprite.setSize(carBodyWidth, carBodyHeight);
@@ -96,26 +98,32 @@ public class TruckScreen implements Screen, InputProcessor {
         rearWheelSprite = mTextureAtlas.createSprite("tire");
         rearWheelSprite.setSize(wheelRadius * 2, wheelRadius * 2);
         rearWheelSprite.setOrigin(wheelRadius, wheelRadius);
+        // 地面UI
+        Texture grassland = new Texture("car/grassland.png");
+        grassland.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        TextureRegion region = new TextureRegion(grassland, 0, 0, 3700, 87);
+        groudImage = new Image(region);
+        groudImage.setSize(370, 10);
+        groudImage.setPosition(0, 0);
 
         mDebugRender = new Box2DDebugRenderer();
-
         mViewport = new ExtendViewport(33, 20);
         stage = new Stage(mViewport);
         uiStage = new Stage(new ScreenViewport());
         // add 加速、减速按钮
         Skin skin = new Skin();
-        skin.add("accBtnUp", new Texture("balloon/3.png"));
-        skin.add("accBtnDown", new Texture("balloon/4.png"));
-        skin.add("decBtnUp", new Texture("balloon/1.png"));
-        skin.add("decBtnDown", new Texture("balloon/7.png"));
+        skin.add("accBtnUp", new Texture("car/acc.png"));
+        skin.add("accBtnDown", new Texture("car/acc2.png"));
+        skin.add("decBtnUp", new Texture("car/dec.png"));
+        skin.add("decBtnDown", new Texture("car/dec2.png"));
 
         int screenWidth = Gdx.graphics.getWidth();
         int screenHeight = Gdx.graphics.getHeight();
         Gdx.app.log(TAG, "screenWidth:" + screenWidth + ", screenHeight:" + screenHeight);
 
         ImageButton accelerateBtn = new ImageButton(skin.getDrawable("accBtnUp"), skin.getDrawable("accBtnDown"));
-        accelerateBtn.setSize(500, 500);
-        accelerateBtn.setPosition(screenWidth - 500, 20);
+        accelerateBtn.setSize(300, 400);
+        accelerateBtn.setPosition(screenWidth - 400, 20);
         accelerateBtn.addListener(new InputListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -132,8 +140,8 @@ public class TruckScreen implements Screen, InputProcessor {
         });
 
         ImageButton decelerateBtn = new ImageButton(skin.getDrawable("decBtnUp"), skin.getDrawable("decBtnDown"));
-        decelerateBtn.setSize(500, 500);
-        decelerateBtn.setPosition(screenWidth - 1000, 20);
+        decelerateBtn.setSize(300, 400);
+        decelerateBtn.setPosition(100, 20);
         decelerateBtn.addListener(new InputListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -143,8 +151,8 @@ public class TruckScreen implements Screen, InputProcessor {
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                frontWheelJoint.setMotorSpeed(1000);
-                rearWheelJoint.setMotorSpeed(1000);
+                frontWheelJoint.setMotorSpeed(500);
+                rearWheelJoint.setMotorSpeed(500);
                 return true;
             }
         });
@@ -176,18 +184,19 @@ public class TruckScreen implements Screen, InputProcessor {
         MyGdxGame.batch.setProjectionMatrix(mCamera.combined);
         stage.act();
         stage.draw();
-        uiStage.act();
-        uiStage.draw();
 
         MyGdxGame.batch.begin();
+        groudImage.draw(MyGdxGame.batch, 1);
         drawSprites();
         MyGdxGame.batch.end();
 
+        uiStage.act();
+        uiStage.draw();
+
         float truckPositionX = mTruck.getPosition().x;
-        float cameraPositionX = mCamera.position.x;
-        if (Math.abs(truckPositionX - cameraPositionX) > 0.05 && truckPositionX < 355) {
+        if (truckPositionX < 355) {
 //            Gdx.app.log(TAG, "update camera pos, truckPositionX:" + truckPositionX + ", cameraPositionX:" + cameraPositionX);
-            mCamera.position.x = truckPositionX;
+            mCamera.position.x = truckPositionX + carBodyWidth / 2;
             mCamera.update();
         }
 
@@ -242,7 +251,6 @@ public class TruckScreen implements Screen, InputProcessor {
         // 车身
         Vector2 carBodyPosition = mTruck.getPosition();
         float carBodyDegrees = (float) Math.toDegrees(mTruck.getAngle());
-        Gdx.app.log(TAG, "drawSprites carBodyPosition:" + carBodyPosition.x + "," + carBodyPosition.y);
         drawSprite(carBodySprite, carBodyPosition.x - carBodyCenter.x, carBodyPosition.y - carBodyCenter.y, carBodyDegrees);
         // 前轮
         Vector2 frontWheelPosition = mFrontWheel.getPosition();
