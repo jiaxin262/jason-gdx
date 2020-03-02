@@ -9,6 +9,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -16,13 +18,11 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
-import com.badlogic.gdx.physics.box2d.joints.WheelJoint;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -43,10 +43,12 @@ public class TruckScreen implements Screen, InputProcessor {
     private OrthographicCamera mCamera;
     private ExtendViewport mViewport;
     private InputMultiplexer multiplexer;
+    private TextureAtlas mTextureAtlas;
+    private Sprite carBodySprite, frontWheelSprite, rearWheelSprite;
 
     private World mWord;
     private Body mGround;
-    private Body mTruck;
+    private Body mTruck, mFrontWheel, mRearWheel;
     private RevoluteJoint frontWheelJoint, rearWheelJoint;
     /**
      * our mouse joint
@@ -57,25 +59,43 @@ public class TruckScreen implements Screen, InputProcessor {
      **/
     protected Body hitBody = null;
     private Box2DDebugRenderer mDebugRender;
+    private Jb2dJson jb2dJson;
 
     private static final float STEP_TIME = 1f / 60f;
     private static final int VELOCITY_ITERATIONS = 6;
     private static final int POSITION_ITERATIONS = 2;
     private float mAccumulator = 0;
+    private float carBodyWidth = 8.4f;
+    private float carBodyHeight = 4.6f;
+    private float wheelRadius = 1.06f;
+    private Vector2 carBodyCenter = new Vector2(3.5f, 2.3f);
 
     public TruckScreen(Game game) {
         this.mGame = game;
         Gdx.input.setCatchKey(Input.Keys.BACK, true);
         Box2D.init();
 
-        Jb2dJson jb2dJson = new Jb2dJson();
+        jb2dJson = new Jb2dJson();
         StringBuilder errMsg = new StringBuilder();
         mWord = jb2dJson.readFromFile(Gdx.files.internal("rube/truck.json"), errMsg, null);
 //        mWord = new World(new Vector2(0, -10), true);
         mGround = jb2dJson.getBodyByName("ground");
         mTruck = jb2dJson.getBodyByName("truckBody");
+        mFrontWheel = jb2dJson.getBodyByName("frontwheel");
+        mRearWheel = jb2dJson.getBodyByName("rearwheel");
         frontWheelJoint = (RevoluteJoint) jb2dJson.getJointByName("frontWheelJoint");
         rearWheelJoint = (RevoluteJoint) jb2dJson.getJointByName("rearWheelJoint");
+
+        mTextureAtlas = new TextureAtlas("car/car.txt");
+        carBodySprite = mTextureAtlas.createSprite("carBody");
+        carBodySprite.setSize(carBodyWidth, carBodyHeight);
+        carBodySprite.setOrigin(carBodyCenter.x, carBodyCenter.y);
+        frontWheelSprite = mTextureAtlas.createSprite("tire");
+        frontWheelSprite.setSize(wheelRadius * 2, wheelRadius * 2);
+        frontWheelSprite.setOrigin(wheelRadius, wheelRadius);
+        rearWheelSprite = mTextureAtlas.createSprite("tire");
+        rearWheelSprite.setSize(wheelRadius * 2, wheelRadius * 2);
+        rearWheelSprite.setOrigin(wheelRadius, wheelRadius);
 
         mDebugRender = new Box2DDebugRenderer();
 
@@ -158,13 +178,15 @@ public class TruckScreen implements Screen, InputProcessor {
         stage.draw();
         uiStage.act();
         uiStage.draw();
+
         MyGdxGame.batch.begin();
+        drawSprites();
         MyGdxGame.batch.end();
 
         float truckPositionX = mTruck.getPosition().x;
         float cameraPositionX = mCamera.position.x;
         if (Math.abs(truckPositionX - cameraPositionX) > 0.05 && truckPositionX < 355) {
-            Gdx.app.log(TAG, "update camera pos, truckPositionX:" + truckPositionX + ", cameraPositionX:" + cameraPositionX);
+//            Gdx.app.log(TAG, "update camera pos, truckPositionX:" + truckPositionX + ", cameraPositionX:" + cameraPositionX);
             mCamera.position.x = truckPositionX;
             mCamera.update();
         }
@@ -196,6 +218,7 @@ public class TruckScreen implements Screen, InputProcessor {
 
     @Override
     public void dispose() {
+        mTextureAtlas.dispose();
         mWord.dispose();
         mDebugRender.dispose();
 
@@ -213,6 +236,28 @@ public class TruckScreen implements Screen, InputProcessor {
             mAccumulator -= STEP_TIME;
             mWord.step(STEP_TIME, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
         }
+    }
+
+    private void drawSprites() {
+        // 车身
+        Vector2 carBodyPosition = mTruck.getPosition();
+        float carBodyDegrees = (float) Math.toDegrees(mTruck.getAngle());
+        Gdx.app.log(TAG, "drawSprites carBodyPosition:" + carBodyPosition.x + "," + carBodyPosition.y);
+        drawSprite(carBodySprite, carBodyPosition.x - carBodyCenter.x, carBodyPosition.y - carBodyCenter.y, carBodyDegrees);
+        // 前轮
+        Vector2 frontWheelPosition = mFrontWheel.getPosition();
+        float frontWheelDegrees = (float) Math.toDegrees(mFrontWheel.getAngle());
+        drawSprite(frontWheelSprite, frontWheelPosition.x - wheelRadius, frontWheelPosition.y - wheelRadius, frontWheelDegrees);
+        // 后轮
+        Vector2 rearWheelPosition = mRearWheel.getPosition();
+        float rearWheelDegrees = (float) Math.toDegrees(mRearWheel.getAngle());
+        drawSprite(rearWheelSprite, rearWheelPosition.x - wheelRadius, rearWheelPosition.y - wheelRadius, rearWheelDegrees);
+    }
+
+    private void drawSprite(Sprite sprite, float posX, float posY, float degrees) {
+        sprite.setPosition(posX, posY);
+        sprite.setRotation(degrees);
+        sprite.draw(MyGdxGame.batch);
     }
 
     @Override

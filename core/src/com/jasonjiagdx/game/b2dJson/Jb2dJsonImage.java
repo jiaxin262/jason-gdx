@@ -21,6 +21,8 @@ package com.jasonjiagdx.game.b2dJson;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 
+import java.util.Arrays;
+
 /**
  *
  */
@@ -58,5 +60,29 @@ public class Jb2dJsonImage implements Comparable {
         return diff == 0 ? 0 : diff < 0 ? -1 : 1;
     }
 
+    @Override
+    public String toString() {
+        return "Jb2dJsonImage{" +
+                "name='" + name + '\'' +
+                ", file='" + file + '\'' +
+                ", body=" + body +
+                ", center=" + center +
+                ", angle=" + angle +
+                ", scale=" + scale +
+                ", aspectScale=" + aspectScale +
+                ", flip=" + flip +
+                ", opacity=" + opacity +
+                ", filter=" + filter +
+                ", renderOrder=" + renderOrder +
+                ", colorTint=" + Arrays.toString(colorTint) +
+                ", corners=" + Arrays.toString(corners) +
+                ", numPoints=" + numPoints +
+                ", points=" + Arrays.toString(points) +
+                ", uvCoords=" + Arrays.toString(uvCoords) +
+                ", numIndices=" + numIndices +
+                ", indices=" + Arrays.toString(indices) +
+                ", path='" + path + '\'' +
+                '}';
+    }
 }
 

@@ -1,0 +1,19 @@
+car.png
+size: 968, 783
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+carBody
+  rotate: false
+  xy: 1, 1
+  size: 966, 526
+  orig: 966, 526
+  offset: 0, 0
+  index: -1
+tire
+  rotate: true
+  xy: 1, 529
+  size: 253, 254
+  orig: 253, 254
+  offset: 0, 0
+  index: -1
