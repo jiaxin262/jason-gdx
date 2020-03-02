@@ -47,7 +47,7 @@ public class TruckScreen implements Screen, InputProcessor {
     private InputMultiplexer multiplexer;
     private TextureAtlas mTextureAtlas;
     private Sprite carBodySprite, frontWheelSprite, rearWheelSprite;
-    private Image groudImage;
+    private Image groudImage, skyImage;
 
     private World mWord;
     private Body mGround;
@@ -98,6 +98,13 @@ public class TruckScreen implements Screen, InputProcessor {
         rearWheelSprite = mTextureAtlas.createSprite("tire");
         rearWheelSprite.setSize(wheelRadius * 2, wheelRadius * 2);
         rearWheelSprite.setOrigin(wheelRadius, wheelRadius);
+        // 天空UI
+        Texture sky = new Texture("car/sky.jpeg");
+        sky.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        TextureRegion skyRegion = new TextureRegion(sky, 0, 0, 3700, 375);
+        skyImage = new Image(skyRegion);
+        skyImage.setSize(370, 13);
+        skyImage.setPosition(0, 7);
         // 地面UI
         Texture grassland = new Texture("car/grassland.png");
         grassland.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
@@ -186,6 +193,7 @@ public class TruckScreen implements Screen, InputProcessor {
         stage.draw();
 
         MyGdxGame.batch.begin();
+        skyImage.draw(MyGdxGame.batch, 1);
         groudImage.draw(MyGdxGame.batch, 1);
         drawSprites();
         MyGdxGame.batch.end();
