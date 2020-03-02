@@ -89,27 +89,13 @@ public class TruckScreen implements Screen, InputProcessor {
         skin.add("decBtnUp", new Texture("balloon/1.png"));
         skin.add("decBtnDown", new Texture("balloon/7.png"));
 
-        ImageButton decelerateBtn = new ImageButton(skin.getDrawable("decBtnUp"), skin.getDrawable("decBtnDown"));
-        decelerateBtn.setSize(500, 500);
-        decelerateBtn.setPosition(0, 0);
-        decelerateBtn.addListener(new InputListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                frontWheelJoint.setMotorSpeed(0);
-                rearWheelJoint.setMotorSpeed(0);
-            }
-
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                frontWheelJoint.setMotorSpeed(1000);
-                rearWheelJoint.setMotorSpeed(1000);
-                return true;
-            }
-        });
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
+        Gdx.app.log(TAG, "screenWidth:" + screenWidth + ", screenHeight:" + screenHeight);
 
         ImageButton accelerateBtn = new ImageButton(skin.getDrawable("accBtnUp"), skin.getDrawable("accBtnDown"));
         accelerateBtn.setSize(500, 500);
-        accelerateBtn.setPosition(300, 0);
+        accelerateBtn.setPosition(screenWidth - 500, 20);
         accelerateBtn.addListener(new InputListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -121,6 +107,24 @@ public class TruckScreen implements Screen, InputProcessor {
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 frontWheelJoint.setMotorSpeed(-1000);
                 rearWheelJoint.setMotorSpeed(-1000);
+                return true;
+            }
+        });
+
+        ImageButton decelerateBtn = new ImageButton(skin.getDrawable("decBtnUp"), skin.getDrawable("decBtnDown"));
+        decelerateBtn.setSize(500, 500);
+        decelerateBtn.setPosition(screenWidth - 1000, 20);
+        decelerateBtn.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                frontWheelJoint.setMotorSpeed(0);
+                rearWheelJoint.setMotorSpeed(0);
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                frontWheelJoint.setMotorSpeed(1000);
+                rearWheelJoint.setMotorSpeed(1000);
                 return true;
             }
         });
