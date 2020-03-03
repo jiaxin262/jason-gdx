@@ -69,7 +69,7 @@ public class IndexScreen implements Screen {
         table.row();
         table.add(rubeButton).padTop(50);
 
-        TextButton truckButton = new TextButton("truck", MyGdxGame.skin);
+        TextButton truckButton = new TextButton("car", MyGdxGame.skin);
         truckButton.addListener(new InputListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {

@@ -242,7 +242,7 @@ public class TruckScreen implements Screen, InputProcessor {
 
         stepWorld();
 
-        mDebugRender.render(mWord, mCamera.combined);
+//        mDebugRender.render(mWord, mCamera.combined);
     }
 
     @Override
