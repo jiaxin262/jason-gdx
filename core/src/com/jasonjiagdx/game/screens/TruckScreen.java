@@ -46,14 +46,15 @@ public class TruckScreen implements Screen, InputProcessor {
     private ExtendViewport mViewport;
     private InputMultiplexer multiplexer;
     private TextureAtlas mTextureAtlas, mFruitAtlas;
-    private Sprite carBodySprite, frontWheelSprite, rearWheelSprite, boxSprite, boardSprite;
+    private Sprite carBodySprite, frontWheelSprite, rearWheelSprite, boxSprite, stoneSprite,
+            boardSprite, orangeSprite;
     private Image groudImage, skyImage;
 
     private World mWord;
     private Body mGround, mBoard;
     private Body mTruck, mFrontWheel, mRearWheel;
     private RevoluteJoint frontWheelJoint, rearWheelJoint;
-    private Body[] boxBodies;
+    private Body[] boxBodies, stoneBodies;
     /**
      * our mouse joint
      **/
@@ -77,6 +78,7 @@ public class TruckScreen implements Screen, InputProcessor {
     private float boardHeight = 0.5f;
     private Vector2 boardBodyCenter = new Vector2(10, 0.25f);
     private Vector2 carBodyCenter = new Vector2(3.5f, 2.3f);
+    private Vector2 stoneCenter = new Vector2(0.24f, 0.14f);
 
     public TruckScreen(Game game) {
         this.mGame = game;
@@ -92,6 +94,7 @@ public class TruckScreen implements Screen, InputProcessor {
         mRearWheel = jb2dJson.getBodyByName("rearwheel");
         mBoard = jb2dJson.getBodyByName("board");
         boxBodies = jb2dJson.getBodiesByName("box");
+        stoneBodies = jb2dJson.getBodiesByName("stone");
         frontWheelJoint = (RevoluteJoint) jb2dJson.getJointByName("frontWheelJoint");
         rearWheelJoint = (RevoluteJoint) jb2dJson.getJointByName("rearWheelJoint");
 
@@ -99,7 +102,12 @@ public class TruckScreen implements Screen, InputProcessor {
         boxSprite = mFruitAtlas.createSprite("crate");
         boxSprite.setSize(1, 1);
         boxSprite.setOrigin(boxRadius, boxRadius);
+        orangeSprite = mFruitAtlas.createSprite("orange");
+        orangeSprite.setSize(1, 1);
         mTextureAtlas = new TextureAtlas("car/car.txt");
+        stoneSprite = mTextureAtlas.createSprite("stone");
+        stoneSprite.setSize(0.48f, 0.28f);
+        stoneSprite.setOrigin(stoneCenter.x, stoneCenter.y);
         // 汽车UI
         carBodySprite = mTextureAtlas.createSprite("carBody");
         carBodySprite.setSize(carBodyWidth, carBodyHeight);
@@ -226,7 +234,7 @@ public class TruckScreen implements Screen, InputProcessor {
 
         stepWorld();
 
-        mDebugRender.render(mWord, mCamera.combined);
+//        mDebugRender.render(mWord, mCamera.combined);
     }
 
     @Override
@@ -288,11 +296,24 @@ public class TruckScreen implements Screen, InputProcessor {
         if (boxBodies != null && boxBodies.length > 0) {
             drawBoxes();
         }
+        // 石头
+        if (stoneBodies != null && stoneBodies.length > 0) {
+            drawStones();
+        }
         // 翘板
         Vector2 boardPosition = mBoard.getPosition();
         float boardDegrees = (float) Math.toDegrees(mBoard.getAngle());
         drawSprite(boardSprite, boardPosition.x - boardBodyCenter.x, boardPosition.y - boardBodyCenter.y, boardDegrees);
+        // 翘板支撑
+        drawSprite(orangeSprite, 44.5f, 6.5f, 0);
+    }
 
+    private void drawStones() {
+        for (Body body : stoneBodies) {
+            Vector2 stonePosition = body.getPosition();
+            float stoneDegrees = (float) Math.toDegrees(body.getAngle());
+            drawSprite(stoneSprite, stonePosition.x - stoneCenter.x, stonePosition.y - stoneCenter.y, stoneDegrees);
+        }
     }
 
     private void drawBoxes() {

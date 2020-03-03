@@ -5,21 +5,28 @@ filter: Linear,Linear
 repeat: none
 board
   rotate: false
-  xy: 1, 1
+  xy: 257, 731
   size: 512, 51
   orig: 512, 51
   offset: 0, 0
   index: -1
 carBody
   rotate: false
-  xy: 1, 256
+  xy: 1, 1
   size: 966, 526
   orig: 966, 526
   offset: 0, 0
   index: -1
+stone
+  rotate: true
+  xy: 257, 529
+  size: 200, 142
+  orig: 200, 142
+  offset: 0, 0
+  index: -1
 tire
   rotate: true
-  xy: 515, 1
+  xy: 1, 529
   size: 253, 254
   orig: 253, 254
   offset: 0, 0
