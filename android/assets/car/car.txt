@@ -1,32 +1,53 @@
 car.png
-size: 968, 783
+size: 2010, 968
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
 board
   rotate: false
-  xy: 257, 731
+  xy: 1, 503
   size: 512, 51
   orig: 512, 51
   offset: 0, 0
   index: -1
 carBody
-  rotate: false
-  xy: 1, 1
+  rotate: true
+  xy: 1483, 1
   size: 966, 526
   orig: 966, 526
   offset: 0, 0
   index: -1
+slope1
+  rotate: false
+  xy: 1, 147
+  size: 1412, 184
+  orig: 1412, 184
+  offset: 0, 0
+  index: -1
+slope2
+  rotate: false
+  xy: 1, 333
+  size: 1423, 168
+  orig: 1423, 168
+  offset: 0, 0
+  index: -1
+slope3
+  rotate: false
+  xy: 1, 1
+  size: 1480, 144
+  orig: 1480, 144
+  offset: 0, 0
+  index: -1
 stone
-  rotate: true
-  xy: 257, 529
+  rotate: false
+  xy: 1, 812
   size: 200, 142
   orig: 200, 142
   offset: 0, 0
   index: -1
 tire
-  rotate: true
-  xy: 1, 529
+  rotate: false
+  xy: 1, 556
   size: 253, 254
   orig: 253, 254
   offset: 0, 0

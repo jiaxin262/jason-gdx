@@ -47,7 +47,7 @@ public class TruckScreen implements Screen, InputProcessor {
     private InputMultiplexer multiplexer;
     private TextureAtlas mTextureAtlas, mFruitAtlas;
     private Sprite carBodySprite, frontWheelSprite, rearWheelSprite, boxSprite, stoneSprite,
-            boardSprite, orangeSprite;
+            boardSprite, orangeSprite, slopeSprite1, slopeSprite2, slopeSprite3;
     private Image groudImage, skyImage;
 
     private World mWord;
@@ -103,11 +103,19 @@ public class TruckScreen implements Screen, InputProcessor {
         boxSprite.setSize(1, 1);
         boxSprite.setOrigin(boxRadius, boxRadius);
         orangeSprite = mFruitAtlas.createSprite("orange");
-        orangeSprite.setSize(1, 1);
+        orangeSprite.setSize(1.05f, 1.05f);
+
         mTextureAtlas = new TextureAtlas("car/car.txt");
         stoneSprite = mTextureAtlas.createSprite("stone");
         stoneSprite.setSize(0.48f, 0.28f);
         stoneSprite.setOrigin(stoneCenter.x, stoneCenter.y);
+        slopeSprite1 = mTextureAtlas.createSprite("slope1");
+        slopeSprite1.setSize(28, 3.5f);
+        slopeSprite2 = mTextureAtlas.createSprite("slope2");
+        slopeSprite2.setSize(30, 3.5f);
+        slopeSprite3 = mTextureAtlas.createSprite("slope3");
+        slopeSprite3.setSize(35.1f, 3.5f);
+
         // 汽车UI
         carBodySprite = mTextureAtlas.createSprite("carBody");
         carBodySprite.setSize(carBodyWidth, carBodyHeight);
@@ -306,6 +314,11 @@ public class TruckScreen implements Screen, InputProcessor {
         drawSprite(boardSprite, boardPosition.x - boardBodyCenter.x, boardPosition.y - boardBodyCenter.y, boardDegrees);
         // 翘板支撑
         drawSprite(orangeSprite, 44.5f, 6.5f, 0);
+        // slope
+        drawSprite(slopeSprite1, 86, 6.5f, 0);
+        drawSprite(slopeSprite2, 148, 6.5f, 0);
+        drawSprite(slopeSprite3, 215.5f, 6.5f, 0);
+
     }
 
     private void drawStones() {
