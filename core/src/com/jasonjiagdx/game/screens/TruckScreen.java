@@ -114,7 +114,7 @@ public class TruckScreen implements Screen, InputProcessor {
         slopeSprite2 = mTextureAtlas.createSprite("slope2");
         slopeSprite2.setSize(30, 3.5f);
         slopeSprite3 = mTextureAtlas.createSprite("slope3");
-        slopeSprite3.setSize(35.1f, 3.5f);
+        slopeSprite3.setSize(38.1f, 3.5f);
 
         // 汽车UI
         carBodySprite = mTextureAtlas.createSprite("carBody");
@@ -242,7 +242,7 @@ public class TruckScreen implements Screen, InputProcessor {
 
         stepWorld();
 
-//        mDebugRender.render(mWord, mCamera.combined);
+        mDebugRender.render(mWord, mCamera.combined);
     }
 
     @Override
@@ -317,7 +317,7 @@ public class TruckScreen implements Screen, InputProcessor {
         // slope
         drawSprite(slopeSprite1, 86, 6.5f, 0);
         drawSprite(slopeSprite2, 148, 6.5f, 0);
-        drawSprite(slopeSprite3, 215.5f, 6.5f, 0);
+        drawSprite(slopeSprite3, 212.5f, 6.5f, 0);
 
     }
 
